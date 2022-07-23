@@ -9,7 +9,7 @@ import (
 type ComponentHandler func(args []string, e *events.ComponentInteractionCreate) error
 
 type Component struct {
-	Action  string
+	Name    string
 	Handler ComponentHandler
 }
 

@@ -9,7 +9,7 @@ import (
 type ModalHandler func(args []string, e *events.ModalSubmitInteractionCreate) error
 
 type Modal struct {
-	Action  string
+	Name    string
 	Handler ModalHandler
 }
 

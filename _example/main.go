@@ -34,6 +34,7 @@ func main() {
 
 	var err error
 	if testBot.Client, err = disgo.New(token,
+		bot.WithLogger(logger),
 		bot.WithDefaultGateway(),
 		bot.WithEventListeners(h),
 	); err != nil {

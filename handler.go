@@ -12,7 +12,10 @@ var _ bot.EventListener = (*Handler)(nil)
 
 func New(logger log.Logger) *Handler {
 	return &Handler{
-		Logger: logger,
+		Logger:     logger,
+		Commands:   map[string]Command{},
+		Components: map[string]Component{},
+		Modals:     map[string]Modal{},
 	}
 }
 
@@ -32,20 +35,22 @@ func (h *Handler) AddCommands(commands ...Command) {
 
 func (h *Handler) AddComponents(components ...Component) {
 	for _, component := range components {
-		h.Components[component.Action] = component
+		h.Components[component.Name] = component
 	}
 }
 
 func (h *Handler) AddModals(modals ...Modal) {
 	for _, modal := range modals {
-		h.Modals[modal.Action] = modal
+		h.Modals[modal.Name] = modal
 	}
 }
 
 func (h *Handler) SyncCommands(client bot.Client, guildIDs ...snowflake.ID) {
 	commands := make([]discord.ApplicationCommandCreate, len(h.Commands))
+	var i int
 	for _, command := range h.Commands {
-		commands = append(commands, command.Create)
+		commands[i] = command.Create
+		i++
 	}
 
 	if len(guildIDs) == 0 {

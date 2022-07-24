@@ -12,8 +12,39 @@ type (
 
 type Command struct {
 	Create               discord.ApplicationCommandCreate
+	Check                CommandCheck
 	CommandHandlers      map[string]CommandHandler
 	AutocompleteHandlers map[string]AutocompleteHandler
+}
+
+type CommandCheck func(e *events.ApplicationCommandInteractionCreate) bool
+
+func (c CommandCheck) Or(check CommandCheck) CommandCheck {
+	return func(e *events.ApplicationCommandInteractionCreate) bool {
+		return c(e) || check(e)
+	}
+}
+
+func (c CommandCheck) And(check CommandCheck) CommandCheck {
+	return func(e *events.ApplicationCommandInteractionCreate) bool {
+		return c(e) && check(e)
+	}
+}
+
+func CommandCheckAnyOf(checks ...CommandCheck) CommandCheck {
+	var check CommandCheck
+	for _, c := range checks {
+		check = check.Or(c)
+	}
+	return check
+}
+
+func CommandCheckAllOf(checks ...CommandCheck) CommandCheck {
+	var check CommandCheck
+	for _, c := range checks {
+		check = check.And(c)
+	}
+	return check
 }
 
 func (h *Handler) handleCommand(e *events.ApplicationCommandInteractionCreate) {
@@ -21,6 +52,10 @@ func (h *Handler) handleCommand(e *events.ApplicationCommandInteractionCreate) {
 	cmd, ok := h.Commands[name]
 	if !ok || cmd.CommandHandlers == nil {
 		h.Logger.Errorf("No command or handler found for \"%s\"", name)
+	}
+
+	if cmd.Check != nil && !cmd.Check(e) {
+		return
 	}
 
 	var path string

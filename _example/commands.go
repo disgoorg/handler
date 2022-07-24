@@ -28,6 +28,7 @@ func TestCommand(b *Bot) handler.Command {
 				},
 			},
 		},
+		Check: simpleCommandCheck(b),
 		CommandHandlers: map[string]handler.CommandHandler{
 			"test1": func(e *events.ApplicationCommandInteractionCreate) error {
 				b.Logger.Info("Test command 1")
@@ -55,5 +56,12 @@ func TestCommand(b *Bot) handler.Command {
 				})
 			},
 		},
+	}
+}
+
+func simpleCommandCheck(b *Bot) func(e *events.ApplicationCommandInteractionCreate) bool {
+	return func(e *events.ApplicationCommandInteractionCreate) bool {
+		b.Logger.Info("Simple command check")
+		return e.User().ID == userID
 	}
 }

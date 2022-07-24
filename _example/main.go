@@ -10,9 +10,13 @@ import (
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/handler"
 	"github.com/disgoorg/log"
+	"github.com/disgoorg/snowflake/v2"
 )
 
-var token = os.Getenv("TOKEN")
+var (
+	token  = os.Getenv("TOKEN")
+	userID = snowflake.GetEnv("USER_ID")
+)
 
 type Bot struct {
 	Logger log.Logger

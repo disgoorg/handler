@@ -1,0 +1,21 @@
+{
+	"checks": {
+		"command": "EN: Command Check",
+		"autocomplete": "EN: Autocomplete Check",
+		"component": "EN: Component Check",
+		"modal": "EN: Modal Check"
+	},
+	"commands": {
+		"test1": "EN: Test Command 1",
+		"test2": "EN: Test Command 2"
+	},
+	"autocompletes": {
+		"test": "EN: Autocomplete Test"
+	},
+	"modals": {
+		"test": "EN: Modal Test"
+	},
+	"components": {
+		"test": "EN: Component Test"
+	}
+}

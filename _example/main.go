@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,12 +12,16 @@ import (
 	"github.com/disgoorg/handler"
 	"github.com/disgoorg/log"
 	"github.com/disgoorg/snowflake/v2"
+	"golang.org/x/text/language"
 )
 
 var (
 	token  = os.Getenv("TOKEN")
 	userID = snowflake.GetEnv("USER_ID")
 )
+
+//go:embed languages/*.json
+var languages embed.FS
 
 type Bot struct {
 	Logger log.Logger
@@ -35,6 +40,11 @@ func main() {
 	h.AddCommands(TestCommand(testBot))
 	h.AddComponents(TestComponent(testBot))
 	h.AddModals(TestModal(testBot))
+
+	h.InitI18n(language.English)
+	if err := h.I18n.LoadFromEmbedFS(languages, "languages"); err != nil {
+		logger.Fatal("Failed to load languages: ", err)
+	}
 
 	var err error
 	if testBot.Client, err = disgo.New(token,

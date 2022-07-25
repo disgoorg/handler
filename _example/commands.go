@@ -2,26 +2,25 @@ package main
 
 import (
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/handler"
 )
 
 func TestCommand(b *Bot) handler.Command {
 	return handler.Command{
 		Create: discord.SlashCommandCreate{
-			CommandName: "test",
+			Name:        "test",
 			Description: "Test command",
 			Options: []discord.ApplicationCommandOption{
 				discord.ApplicationCommandOptionSubCommand{
-					CommandName: "test1",
+					Name:        "test1",
 					Description: "Test command 1",
 				},
 				discord.ApplicationCommandOptionSubCommandGroup{
-					GroupName:   "test",
+					Name:        "test",
 					Description: "Test command 1",
 					Options: []discord.ApplicationCommandOptionSubCommand{
 						{
-							CommandName: "test2",
+							Name:        "test2",
 							Description: "Test command 2",
 						},
 					},
@@ -30,11 +29,11 @@ func TestCommand(b *Bot) handler.Command {
 		},
 		Check: simpleCommandCheck(b),
 		CommandHandlers: map[string]handler.CommandHandler{
-			"test1": func(e *events.ApplicationCommandInteractionCreate) error {
-				b.Logger.Info("Test command 1")
+			"test1": func(ctx *handler.CommandContext) error {
+				b.Logger.Info(ctx.Printer.Sprintf("commands.test1"))
 
-				return e.CreateMessage(discord.MessageCreate{
-					Content: "test1",
+				return ctx.CreateMessage(discord.MessageCreate{
+					Content: ctx.Printer.Sprintf("commands.test1"),
 					Components: []discord.ContainerComponent{
 						discord.ActionRowComponent{
 							discord.NewPrimaryButton("test1", "handler:test"),
@@ -42,10 +41,10 @@ func TestCommand(b *Bot) handler.Command {
 					},
 				})
 			},
-			"test/test2": func(e *events.ApplicationCommandInteractionCreate) error {
-				b.Logger.Info("Test command 2")
+			"test/test2": func(ctx *handler.CommandContext) error {
+				b.Logger.Info(ctx.Printer.Sprintf("commands.test2"))
 
-				return e.CreateModal(discord.ModalCreate{
+				return ctx.CreateModal(discord.ModalCreate{
 					CustomID: "handler:test",
 					Title:    "Test Modal",
 					Components: []discord.ContainerComponent{
@@ -59,9 +58,9 @@ func TestCommand(b *Bot) handler.Command {
 	}
 }
 
-func simpleCommandCheck(b *Bot) func(e *events.ApplicationCommandInteractionCreate) bool {
-	return func(e *events.ApplicationCommandInteractionCreate) bool {
-		b.Logger.Info("Simple command check")
-		return e.User().ID == userID
+func simpleCommandCheck(b *Bot) func(ctx *handler.CommandContext) bool {
+	return func(ctx *handler.CommandContext) bool {
+		b.Logger.Info(ctx.Printer.Sprintf("checks.command"))
+		return ctx.User().ID == userID
 	}
 }

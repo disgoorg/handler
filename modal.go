@@ -6,10 +6,11 @@ import (
 	"github.com/disgoorg/disgo/events"
 )
 
-type ModalHandler func(args []string, e *events.ModalSubmitInteractionCreate) error
+type ModalHandler func(ctx *ModalContext) error
 
 type Modal struct {
 	Name    string
+	Check   Check[*ModalContext]
 	Handler ModalHandler
 }
 
@@ -26,7 +27,17 @@ func (h *Handler) handleModal(e *events.ModalSubmitInteractionCreate) {
 		h.Logger.Errorf("No modal handler for \"%s\" found", modalName)
 	}
 
-	if err := modal.Handler(args[2:], e); err != nil {
+	ctx := &ModalContext{
+		ModalSubmitInteractionCreate: e,
+		Printer:                      h.I18n.NewPrinter(e.Locale()),
+		Args:                         args[2:],
+	}
+
+	if modal.Check != nil && !modal.Check(ctx) {
+		return
+	}
+
+	if err := modal.Handler(ctx); err != nil {
 		h.Logger.Errorf("Failed to handle modal interaction for \"%s\" : %s", modalName, err)
 	}
 }

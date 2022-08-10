@@ -29,7 +29,7 @@ Documentation is wip and can be found under
 
 ## Troubleshooting
 
-For help feel free to open an issues or reach out on [Discord](https://discord.gg/9tKpqXjYVC)
+For help feel free to open an issue or reach out on [Discord](https://discord.gg/9tKpqXjYVC)
 
 ## Contributing
 

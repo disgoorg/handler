@@ -15,7 +15,7 @@ type Component struct {
 }
 
 func (h *Handler) handleComponent(e *events.ComponentInteractionCreate) {
-	customID := e.Data.CustomID().String()
+	customID := e.Data.CustomID()
 	if !strings.HasPrefix(customID, "handler:") {
 		return
 	}

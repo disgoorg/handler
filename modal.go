@@ -15,7 +15,7 @@ type Modal struct {
 }
 
 func (h *Handler) handleModal(e *events.ModalSubmitInteractionCreate) {
-	customID := e.Data.CustomID.String()
+	customID := e.Data.CustomID
 	if !strings.HasPrefix(customID, "handler:") {
 		return
 	}

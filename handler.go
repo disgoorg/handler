@@ -1,14 +1,11 @@
 package handler
 
 import (
-	"context"
-
 	"github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/log"
 	"github.com/disgoorg/snowflake/v2"
-	"golang.org/x/text/language"
 )
 
 var _ bot.EventListener = (*Handler)(nil)
@@ -23,17 +20,11 @@ func New(logger log.Logger) *Handler {
 }
 
 type Handler struct {
-	Logger     log.Logger
-	I18n       *I18n
-	NewCtxFunc func() context.Context
+	Logger log.Logger
 
 	Commands   map[string]Command
 	Components map[string]Component
 	Modals     map[string]Modal
-}
-
-func (h *Handler) InitI18n(fallbackLocale language.Tag) {
-	h.I18n = newI18n(h.Logger, fallbackLocale)
 }
 
 func (h *Handler) AddCommands(commands ...Command) {

@@ -3,10 +3,9 @@ module github.com/disgoorg/handler
 go 1.18
 
 require (
-	github.com/disgoorg/disgo v0.13.15
+	github.com/disgoorg/disgo v0.13.16
 	github.com/disgoorg/log v1.2.0
 	github.com/disgoorg/snowflake/v2 v2.0.0
-	golang.org/x/text v0.3.7
 )
 
 require (

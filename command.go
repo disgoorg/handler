@@ -6,36 +6,31 @@ import (
 )
 
 type (
-	CommandHandler      func(ctx *CommandContext) error
-	AutocompleteHandler func(ctx *AutocompleteContext) error
+	CommandHandler      func(event *events.ApplicationCommandInteractionCreate) error
+	AutocompleteHandler func(event *events.AutocompleteInteractionCreate) error
 )
 
 type Command struct {
 	Create               discord.ApplicationCommandCreate
-	Check                Check[*CommandContext]
-	AutocompleteCheck    Check[*AutocompleteContext]
+	Check                Check[*events.ApplicationCommandInteractionCreate]
+	AutocompleteCheck    Check[*events.AutocompleteInteractionCreate]
 	CommandHandlers      map[string]CommandHandler
 	AutocompleteHandlers map[string]AutocompleteHandler
 }
 
-func (h *Handler) handleCommand(e *events.ApplicationCommandInteractionCreate) {
-	name := e.Data.CommandName()
+func (h *Handler) handleCommand(event *events.ApplicationCommandInteractionCreate) {
+	name := event.Data.CommandName()
 	cmd, ok := h.Commands[name]
 	if !ok || cmd.CommandHandlers == nil {
 		h.Logger.Errorf("No command or handler found for \"%s\"", name)
 	}
 
-	ctx := &CommandContext{
-		ApplicationCommandInteractionCreate: e,
-		Printer:                             h.I18n.NewPrinter(e.Locale()),
-	}
-
-	if cmd.Check != nil && !cmd.Check(ctx) {
+	if cmd.Check != nil && !cmd.Check(event) {
 		return
 	}
 
 	var path string
-	if d, ok := e.Data.(discord.SlashCommandInteractionData); ok {
+	if d, ok := event.Data.(discord.SlashCommandInteractionData); ok {
 		path = buildCommandPath(d.SubCommandName, d.SubCommandGroupName)
 	}
 
@@ -45,28 +40,23 @@ func (h *Handler) handleCommand(e *events.ApplicationCommandInteractionCreate) {
 		return
 	}
 
-	if err := handler(ctx); err != nil {
+	if err := handler(event); err != nil {
 		h.Logger.Errorf("Failed to handle command \"%s\" with path \"%s\": %s", name, path, err)
 	}
 }
 
-func (h *Handler) handleAutocomplete(e *events.AutocompleteInteractionCreate) {
-	name := e.Data.CommandName
+func (h *Handler) handleAutocomplete(event *events.AutocompleteInteractionCreate) {
+	name := event.Data.CommandName
 	cmd, ok := h.Commands[name]
 	if !ok || cmd.AutocompleteHandlers == nil {
 		h.Logger.Errorf("No command or handler found for \"%s\"", name)
 	}
 
-	ctx := &AutocompleteContext{
-		AutocompleteInteractionCreate: e,
-		Printer:                       h.I18n.NewPrinter(e.Locale()),
-	}
-
-	if cmd.AutocompleteCheck != nil && !cmd.AutocompleteCheck(ctx) {
+	if cmd.AutocompleteCheck != nil && !cmd.AutocompleteCheck(event) {
 		return
 	}
 
-	path := buildCommandPath(e.Data.SubCommandName, e.Data.SubCommandGroupName)
+	path := buildCommandPath(event.Data.SubCommandName, event.Data.SubCommandGroupName)
 
 	handler, ok := cmd.AutocompleteHandlers[path]
 	if !ok {
@@ -74,7 +64,7 @@ func (h *Handler) handleAutocomplete(e *events.AutocompleteInteractionCreate) {
 		return
 	}
 
-	if err := handler(ctx); err != nil {
+	if err := handler(event); err != nil {
 		h.Logger.Errorf("Failed to handle autocomplete for command \"%s\" with path \"%s\": %s", name, path, err)
 	}
 }

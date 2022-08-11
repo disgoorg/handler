@@ -6,38 +6,31 @@ import (
 	"github.com/disgoorg/disgo/events"
 )
 
-type ComponentHandler func(ctx *ComponentContext) error
+type ComponentHandler func(event *events.ComponentInteractionCreate) error
 
 type Component struct {
 	Name    string
-	Check   Check[*ComponentContext]
+	Check   Check[*events.ComponentInteractionCreate]
 	Handler ComponentHandler
 }
 
-func (h *Handler) handleComponent(e *events.ComponentInteractionCreate) {
-	customID := e.Data.CustomID()
+func (h *Handler) handleComponent(event *events.ComponentInteractionCreate) {
+	customID := event.Data.CustomID()
 	if !strings.HasPrefix(customID, "handler:") {
 		return
 	}
 
-	args := strings.Split(customID, ":")
-	componentName := args[1]
+	componentName := strings.Split(customID, ":")[1]
 	component, ok := h.Components[componentName]
 	if !ok || component.Handler == nil {
 		h.Logger.Errorf("No component handler for \"%s\" found", componentName)
 	}
 
-	ctx := &ComponentContext{
-		ComponentInteractionCreate: e,
-		Printer:                    h.I18n.NewPrinter(e.Locale()),
-		Args:                       args[2:],
-	}
-
-	if component.Check != nil && !component.Check(ctx) {
+	if component.Check != nil && !component.Check(event) {
 		return
 	}
 
-	if err := component.Handler(ctx); err != nil {
+	if err := component.Handler(event); err != nil {
 		h.Logger.Errorf("Failed to handle component interaction for \"%s\" : %s", componentName, err)
 	}
 }

@@ -1,3 +1,4 @@
+// Deprecated: disgo now ships it's own handler package
 module github.com/disgoorg/handler
 
 go 1.18
